@@ -9,7 +9,7 @@ class RegulatoryMapping(Base):
     __tablename__ = "regulatory_mapping"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    control_key: Mapped[str] = mapped_column(index=True)
+    control_key: Mapped[str] = mapped_column(unique=True, index=True)
     regulation_name: Mapped[str]
     reference_text: Mapped[str] = mapped_column(Text)
     guidance_type: Mapped[GuidanceType] = mapped_column(sa_enum(GuidanceType))

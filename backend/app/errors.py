@@ -27,6 +27,14 @@ class AssessmentNotFoundError(DomainError):
     status_code = 404
 
 
+class DuplicateRegulatoryMappingError(DomainError):
+    status_code = 409
+
+
+class RegulatoryMappingNotFoundError(DomainError):
+    status_code = 404
+
+
 def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
     async def _handle_domain_error(request: Request, exc: DomainError) -> JSONResponse:
