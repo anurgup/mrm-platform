@@ -23,5 +23,5 @@ class AuditLog(Base):
     llm_provider_used: Mapped[str | None]
     guardrail_result: Mapped[str | None]
     risk_assessment_result: Mapped[str | None]
-    report_generated: Mapped[bool | None]
+    report_generated: Mapped[str | None]
     detail: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
