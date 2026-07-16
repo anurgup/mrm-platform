@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.ai_models import router as ai_models_router
+from app.api.risk import router as risk_router
 from app.config import get_settings
 from app.errors import register_error_handlers
 
@@ -20,6 +21,7 @@ def create_app() -> FastAPI:
 
     register_error_handlers(app)
     app.include_router(ai_models_router)
+    app.include_router(risk_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

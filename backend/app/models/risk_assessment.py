@@ -19,7 +19,7 @@ class RiskAssessment(Base):
     risk_score: Mapped[int]
     risk_category: Mapped[RiskCategory] = mapped_column(sa_enum(RiskCategory))
     assessment_reason: Mapped[str] = mapped_column(Text)
-    factor_breakdown: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
+    factor_breakdown: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list)
     assessed_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     model: Mapped["AIModel"] = relationship(back_populates="risk_assessments")
