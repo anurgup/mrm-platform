@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from app.database import Base
 from app.models import AuditLog, GuardrailAction, GuardrailStage, RiskCategory
@@ -30,7 +31,9 @@ FORBIDDEN_NAME_SUBSTRINGS = ("update", "delete", "edit", "remove", "patch")
 
 @pytest.fixture
 def db() -> Session:
-    engine = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    engine = create_engine(
+        "sqlite:///:memory:", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
     Base.metadata.create_all(bind=engine)
     session = sessionmaker(bind=engine)()
     try:

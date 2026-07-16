@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.ai_models import router as ai_models_router
 from app.config import get_settings
+from app.errors import register_error_handlers
 
 
 def create_app() -> FastAPI:
@@ -15,6 +17,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    register_error_handlers(app)
+    app.include_router(ai_models_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:
