@@ -5,21 +5,26 @@ from sqlalchemy import pool
 
 from alembic import context
 
+import app.models  # noqa: F401  (import registers every model on Base.metadata)
 from app.config import get_settings
 from app.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+
+# Only default to the app's configured database — if a caller already set
+# sqlalchemy.url programmatically (e.g. tests pointing at a throwaway
+# sqlite file), leave it alone.
+_placeholder = "driver://user:pass@localhost/dbname"
+if config.get_main_option("sqlalchemy.url") in (None, _placeholder):
+    config.set_main_option("sqlalchemy.url", get_settings().database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# ORM models register themselves on Base.metadata when imported (models/
-# package is empty for now — this is P-0.1, no domain models yet).
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

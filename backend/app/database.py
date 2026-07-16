@@ -1,9 +1,14 @@
 from collections.abc import Generator
+from datetime import datetime, timezone
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import get_settings
+
+
+def utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 settings = get_settings()
 
