@@ -1,7 +1,7 @@
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Date, ForeignKey, Text
+from sqlalchemy import JSON, Date, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base, utcnow
@@ -20,7 +20,7 @@ class Finding(Base):
     severity: Mapped[Severity] = mapped_column(sa_enum(Severity))
     risk_description: Mapped[str] = mapped_column(Text)
     remediation: Mapped[str] = mapped_column(Text)
-    regulatory_reference: Mapped[str | None]
+    regulatory_reference: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     control_key: Mapped[str | None]
     status: Mapped[FindingStatus] = mapped_column(sa_enum(FindingStatus), default=FindingStatus.OPEN)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)

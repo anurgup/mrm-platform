@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import OperationalError
 
 from app.api.ai_models import router as ai_models_router
+from app.api.control import router as control_router
 from app.api.regulatory import router as regulatory_router
 from app.api.risk import router as risk_router
 from app.config import get_settings
@@ -50,6 +51,7 @@ def create_app() -> FastAPI:
     app.include_router(ai_models_router)
     app.include_router(risk_router)
     app.include_router(regulatory_router)
+    app.include_router(control_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:
