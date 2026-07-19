@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16
+    container_name: mrm_postgres
+    environment:
+      POSTGRES_USER: mrm_user
+      POSTGRES_PASSWORD: mrm_password
+      POSTGRES_DB: mrm_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - mrm_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mrm_user -d mrm_db"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  app:
+    build:
+      context: ./backend
+    container_name: mrm_app
+    environment:
+      DATABASE_URL: postgresql://mrm_user:mrm_password@db:5432/mrm_db
+      ENVIRONMENT: production
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/scripts:/app/scripts
+    command: >
+      sh -c "alembic upgrade head &&
+             python scripts/seed_data.py &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  mrm_postgres_data:

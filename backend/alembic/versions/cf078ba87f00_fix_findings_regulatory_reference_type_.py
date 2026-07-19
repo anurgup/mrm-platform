@@ -22,11 +22,17 @@ def upgrade() -> None:
     """Upgrade schema."""
     # batch_alter_table: plain ALTER COLUMN TYPE is not supported on sqlite —
     # batch mode recreates the table under the hood there, plain ALTER on postgres.
+    # postgresql_using: postgres has no implicit VARCHAR->JSON cast (only
+    # sqlite's batch-recreate path tolerated the bare type change) — a
+    # no-op on sqlite, required on postgres. Confirmed by actually hitting
+    # `psycopg2.errors.DatatypeMismatch` against a real postgres container
+    # before adding this.
     with op.batch_alter_table('findings') as batch_op:
         batch_op.alter_column('regulatory_reference',
                    existing_type=sa.VARCHAR(),
                    type_=sa.JSON(),
-                   existing_nullable=True)
+                   existing_nullable=True,
+                   postgresql_using='regulatory_reference::json')
 
 
 def downgrade() -> None:
@@ -35,4 +41,5 @@ def downgrade() -> None:
         batch_op.alter_column('regulatory_reference',
                    existing_type=sa.JSON(),
                    type_=sa.VARCHAR(),
-                   existing_nullable=True)
+                   existing_nullable=True,
+                   postgresql_using='regulatory_reference::varchar')

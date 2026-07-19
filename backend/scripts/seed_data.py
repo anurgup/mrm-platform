@@ -28,6 +28,14 @@ The real numbers are printed below and used in tests/test_seed.py:
   - Model 3 scores 45 (MEDIUM) — matches the brief. But its payload sets
     TWO attestations false (independent_validation, drift_monitoring), and
     both are MEDIUM-tier-required, so both produce findings, not one.
+
+IDEMPOTENCY: this script is safe to run against a DB that's already seeded
+(e.g. every `docker compose up` on a container restart, where the postgres
+volume — and therefore the 3 models — persists). Without this check,
+create_model() would raise DuplicateModelError on the second run, the `sh
+-c "... && python scripts/seed_data.py && ..."` chain in docker-compose.yml
+would abort with a non-zero exit, and uvicorn would never start. Confirmed
+this is a real failure mode, not a hypothetical, before adding the guard.
 """
 
 import subprocess
@@ -37,10 +45,12 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BACKEND_DIR))
 
+from sqlalchemy import select  # noqa: E402
 from sqlalchemy.orm import Session  # noqa: E402
 
 from app.config import get_settings  # noqa: E402
 from app.database import SessionLocal  # noqa: E402
+from app.models import AIModel  # noqa: E402
 from app.models.enums import (  # noqa: E402
     BusinessFunction,
     DataClassification,
@@ -153,6 +163,14 @@ def main() -> None:
     db = SessionLocal()
     try:
         seed_regulatory_mappings(db)
+
+        if db.execute(select(AIModel)).scalars().first() is not None:
+            existing = db.execute(select(AIModel.name)).scalars().all()
+            print("Database already seeded — skipping (found existing models):")
+            for name in existing:
+                print(f"  {name}")
+            return
+
         results = [_seed_model(db, payload) for payload in (MODEL_1, MODEL_2, MODEL_3)]
     finally:
         db.close()

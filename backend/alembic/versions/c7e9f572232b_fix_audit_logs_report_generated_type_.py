@@ -23,11 +23,15 @@ def upgrade() -> None:
     # batch_alter_table: plain ALTER COLUMN TYPE is not supported on sqlite
     # (it can only ADD/DROP/RENAME columns) — batch mode recreates the table
     # under the hood on sqlite, and is a plain ALTER on postgres.
+    # postgresql_using: postgres has no implicit BOOLEAN->VARCHAR cast (only
+    # sqlite's batch-recreate path tolerated the bare type change) — a
+    # no-op on sqlite, required on postgres.
     with op.batch_alter_table('audit_logs') as batch_op:
         batch_op.alter_column('report_generated',
                    existing_type=sa.BOOLEAN(),
                    type_=sa.String(),
-                   existing_nullable=True)
+                   existing_nullable=True,
+                   postgresql_using='report_generated::varchar')
 
 
 def downgrade() -> None:
@@ -36,4 +40,5 @@ def downgrade() -> None:
         batch_op.alter_column('report_generated',
                    existing_type=sa.String(),
                    type_=sa.BOOLEAN(),
-                   existing_nullable=True)
+                   existing_nullable=True,
+                   postgresql_using="report_generated::boolean")
