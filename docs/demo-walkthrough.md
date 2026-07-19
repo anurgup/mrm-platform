@@ -324,18 +324,24 @@ curl "http://localhost:8000/audit-logs?model_id=2"
 ```
 ```json
 [
+  {"id": 11, "action": "DEPLOYMENT_GATE_CHECKED", "model_id": 2, "user": "gate",
+   "guardrail_result": "BLOCKED"},
   {"id": 8, "action": "CONTROL_ASSESSED", "model_id": 2, "user": "governance_analyst",
-   "timestamp": "2026-07-19T14:36:12.66Z", "risk_assessment_result": "FAIL"},
+   "risk_assessment_result": "FAIL"},
   {"id": 5, "action": "RISK_ASSESSED", "model_id": 2, "user": "risk_analyst",
-   "timestamp": "2026-07-19T14:36:12.63Z", "risk_assessment_result": "HIGH"},
+   "risk_assessment_result": "HIGH"},
   {"id": 2, "action": "MODEL_REGISTERED", "model_id": 2, "user": "system",
-   "timestamp": "2026-07-19T14:36:12.60Z", "detail": {"name": "Fraud Detection Vendor API"}}
+   "detail": {"name": "Fraud Detection Vendor API"}}
 ]
 ```
-CRO reads: "Every decision is timestamped and immutable — newest first. If
-an auditor asks 'why was this model blocked,' we show exactly what the
-system found, when, and why. Nothing here can be edited or deleted — that's
-enforced structurally, not by policy."
+Four rows, not three — this trail is captured *after* Scene 3b's gate check,
+which is itself an audited event (`DEPLOYMENT_GATE_CHECKED`, newest first).
+
+CRO reads: "Every decision is timestamped and immutable — newest first,
+including the gate check itself. If an auditor asks 'why was this model
+blocked,' we show exactly what the system found, when, and why. Nothing
+here can be edited or deleted — that's enforced structurally, not by
+policy."
 
 ====================================================
 ## Scene 5: Remediation (close the findings, fix all four gaps)
