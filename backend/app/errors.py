@@ -39,6 +39,10 @@ class FindingNotFoundError(DomainError):
     status_code = 404
 
 
+class InvalidDiscoveredAssetError(DomainError):
+    status_code = 400
+
+
 def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(DomainError)
     async def _handle_domain_error(request: Request, exc: DomainError) -> JSONResponse:
