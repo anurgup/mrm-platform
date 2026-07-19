@@ -9,6 +9,7 @@ from sqlalchemy.exc import OperationalError
 from app.api.ai_models import router as ai_models_router
 from app.api.audit import router as audit_router
 from app.api.control import router as control_router
+from app.api.discovery import router as discovery_router
 from app.api.gate import router as gate_router
 from app.api.regulatory import router as regulatory_router
 from app.api.risk import router as risk_router
@@ -56,6 +57,7 @@ def create_app() -> FastAPI:
     app.include_router(control_router)
     app.include_router(gate_router)
     app.include_router(audit_router)
+    app.include_router(discovery_router)
 
     @app.get("/health")
     def health() -> dict[str, str]:
